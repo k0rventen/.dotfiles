@@ -1,5 +1,6 @@
 # envs & path
 set fish_greeting 
+set fish
 set -xg EDITOR nano
 
 # short aliases
@@ -8,10 +9,35 @@ alias p  'python3'
 alias g  'git'
 alias n  'k9s --headless --crumbsless'
 alias kp 'kubectl port-forward'
+alias h  'hey_gpt'
 
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 dotfiles config --local status.showUntrackedFiles no
+
+# initial kubeconfig setup
+test -n $OG_KUBECONFIG; and set -gx KUBECONFIG $OG_KUBECONFIG
+
+
+# https://kadekillary.work/posts/1000x-eng/
+function hey_gpt
+    set prompt (echo $argv | string join ' ')
+    set gpt (https -b post api.openai.com/v1/chat/completions \
+                 "Authorization: Bearer $OPENAI_KEY" \
+                 model=gpt-3.5-turbo \
+                 temperature:=0.4 \
+                 stream:=true \
+                 messages:='[{"role": "user", "content": "'$prompt'"}]')
+    for chunk in $gpt
+        if test $chunk = 'data: [DONE]'
+            break
+        else if string match -q --regex "role" $chunk
+            continue
+        else if string match -q --regex "content" $chunk
+            echo -n $chunk | string replace 'data: ' '' | jq -r -j '.choices[0].delta.content'
+        end
+    end
+end
 
 # functions
 function bdec
@@ -22,18 +48,14 @@ function benc
   printf "$argv" | base64 
 end
 
-function rand_token --description "create a random token of len $argv[1]"
+function rand_token
   openssl rand -hex $argv | cut -c 1-$argv
-end
-
-if test -n $OG_KUBECONFIG
-  set -gx KUBECONFIG $OG_KUBECONFIG
 end
 
 function kctx
   if count $argv > /dev/null
     set -f new_config (find ~/.kube/configs -type f -name "$argv")
-    if test -n "$new_config" && test -f "$new_config"
+    if test -f "$new_config"
       set -gx KUBECONFIG $new_config
       set -U OG_KUBECONFIG $new_config
       k config use-context $argv
@@ -45,7 +67,7 @@ function kctx
   end 
 end
 
-function kns --description "list and set kube namespaces"
+function kns
   if count $argv > /dev/null
     k config set-context --current --namespace $argv
   else
@@ -54,24 +76,12 @@ function kns --description "list and set kube namespaces"
 end
 
 
-function klog --description "get logs from a pod using a pattern instead of the full pod name (eg 'klog api' instead of 'k logs api-randomchars') "
+function klogs
   if test (count $argv) -gt 1
-    k logs  $argv[2..] (k get pods | grep $argv[1] | awk '{print $1}')
+    k logs $argv[2..] (k get pods | grep $argv[1] | awk '{print $1}')
   else 
     k logs (k get pods | grep $argv[1] | awk '{print $1}')
   end 
-end
-
-function cloudcode
-  if test "$argv[1]" = 'off'
-    echo "stopping cloud env"
-    gcloud compute instances stop sandbox
-    return
-  end
-  echo "starting cloud code"
-  gcloud compute instances start sandbox
-  echo "fetching ssh infos"
-  gcloud compute config-ssh
 end
 
 
