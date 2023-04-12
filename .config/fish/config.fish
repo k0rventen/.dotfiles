@@ -11,6 +11,12 @@ alias n  'k9s --headless --crumbsless'
 alias kp 'kubectl port-forward'
 alias h  'hey_gpt'
 
+# git aliases
+alias gs 'git status'
+alias ga 'git add'
+alias gc 'git commit -m'
+
+
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 dotfiles config --local status.showUntrackedFiles no
@@ -20,6 +26,7 @@ test -n $OG_KUBECONFIG; and set -gx KUBECONFIG $OG_KUBECONFIG
 
 
 # https://kadekillary.work/posts/1000x-eng/
+# to set the key, set -U OPENAI_KEY <KEY>
 function hey_gpt
     set prompt (echo $argv | string join ' ')
     set gpt (https -b post api.openai.com/v1/chat/completions \
