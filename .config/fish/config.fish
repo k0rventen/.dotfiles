@@ -1,32 +1,31 @@
 # envs & path
 set fish_greeting 
-set fish
 set -xg EDITOR nano
 
-# short aliases
-alias k  'kubectl'
-alias p  'python3'
-alias g  'git'
-alias n  'k9s --headless --crumbsless'
-alias kp 'kubectl port-forward'
-alias h  'hey_gpt'
+# very short aliases
+alias k 'kubectl'
+alias p 'python3'
+alias g 'git'
+alias n 'k9s --headless --crumbsless'
+alias h 'hey_gpt'
+alias s 'skaffold'
 
-# git aliases
+# short aliases
+alias kp 'kubectl port-forward'
 alias gs 'git status'
 alias ga 'git add'
 alias gc 'git commit -m'
+alias gp 'git push'
 
 
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 dotfiles config --local status.showUntrackedFiles no
 
-# initial kubeconfig setup
-test -n $OG_KUBECONFIG; and set -gx KUBECONFIG $OG_KUBECONFIG
-
 
 # https://kadekillary.work/posts/1000x-eng/
 # to set the key, set -U OPENAI_KEY <KEY>
+# needs httpie and jq
 function hey_gpt
     set prompt (echo $argv | string join ' ')
     set gpt (https -b post api.openai.com/v1/chat/completions \
@@ -59,36 +58,46 @@ function rand_token
   openssl rand -hex $argv | cut -c 1-$argv
 end
 
+
+# kubernetes related function 
+
+
+# initial kubeconfig setup
+if test -n "$OG_KUBECONFIG"
+  set -gx KUBECONFIG $OG_KUBECONFIG
+else if test -d ~/.kube/configs
+  set -U OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
+  set -gx KUBECONFIG $OG_KUBECONFIG
+end
+
 function kctx
   if count $argv > /dev/null
-    set -f new_config (find ~/.kube/configs -type f -name "$argv")
-    if test -f "$new_config"
-      set -gx KUBECONFIG $new_config
-      set -U OG_KUBECONFIG $new_config
-      k config use-context $argv
-    else
-      echo "context $argv does not exists"
+    # find the file that contains the context
+    for config in (find ~/.kube/configs -type f)
+      ctxname="$argv[1]" yq '.contexts.[] | .name==env(ctxname)' < $config | string match -q 'true'
+      if test $status = 0
+        set -gx KUBECONFIG $config
+        set -U OG_KUBECONFIG $config
+        echo 'Found matching context in '$config
+        kubectl config use-context $argv
+        return
+      end
     end
+    echo 'No matching context found..'
   else 
+    # print out all the contexts
     KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config get-contexts
   end 
 end
 
+complete -c kctx -f -a "(KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config view | yq '.contexts.[] | .name')"
+
 function kns
   if count $argv > /dev/null
-    k config set-context --current --namespace $argv
+    kubectl config set-context --current --namespace $argv
   else
-    k get ns
+    kubectl get ns
   end
-end
-
-
-function klogs
-  if test (count $argv) -gt 1
-    k logs $argv[2..] (k get pods | grep $argv[1] | awk '{print $1}')
-  else 
-    k logs (k get pods | grep $argv[1] | awk '{print $1}')
-  end 
 end
 
 
@@ -107,6 +116,7 @@ if test -d ~/.kube/configs && command -q yq
 else
   function kube_prompt
   end
+  
 end
 
 function home_prompt
