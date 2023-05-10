@@ -4,43 +4,47 @@ dotfiles repo using a bare git repo
 
 ## deploy on a sh-able machine
 
+_(you'll need at least curl and git)_
+
 ```sh
 curl -sfL https://raw.githubusercontent.com/k0rventen/.dotfiles/main/.config/setup.sh | sh
 ```
 
 This will clone the repo with the right options, and `checkout -f`.
-Any previous files that overlap will be overwritten !
+__Any previous files that overlap will be overwritten !__
 
 
 ## prompt components
 
 Here are all the prompt components when all the features are present:
 ```
-✓ 7s mac-pro:~ [local-qemu:app] (main)
+✓ 7s mac-pro:~ [local-qemu:app] (main*)
 > 
 ```
 It can be decomposed as follows:
 - `✓`: state of the previous command (`✗` if return code != 0)
-- `7s`: time taken by the previous command (if more than 1 second)
-- `mac-pro:~`: hostname:working dir
+- `7s`: time taken by the previous command (if between 1s and 1h)
+- `mac-pro:~`: hostname and working dir
 - `[local-qemu:app]`: current k8s context and namespace. They are per-session (see the kctx & kns wrappers below)
-- `(main)`: current git branch 
-
+- `(main*)`: current git branch (`*` indicates a dirty env)
+ 
 
 ## functions & wrappers
 
 - one letter aliases for git (`g`), kubectl (`k`), skaffold (`s`) and others
 - two letters aliases for common command-argument combo:
   - `gs`,`ga`, `gc`,`gp`: git status/add/commit/push
-  - `kt`,`kp`: kubectl top/port-forward
+  - `kp`: kubectl port-forward
   - `bdec`, `benc`: for encoding/decoding b64 payloads
 - `kctx` & `kns` : functions that lists/changes your kube contexts/ns for __this__ fish session, allowing you to have different contexts on
   other sessions
 - `hey_gpt` function for interacting with ChatGPT from the commandline
+- `watch` & `repeat`: simpler version of watch & xargs.
 
 Demo:
 
 ```
+✓ 7s mac-pro:~ [local-qemu:app]
 > hey_gpt write a short poem about kubernetes
 Kubernetes, oh Kubernetes
 A master of orchestration

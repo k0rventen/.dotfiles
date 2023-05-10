@@ -78,6 +78,7 @@ if command -q https -a command -q jq
   end
 end
 
+
 # decode b64 from stdin
 function bdec 
   printf "$argv" | base64 -d
@@ -173,8 +174,9 @@ end
 
 if command -q git
   function git_prompt
-    set git_out (git branch --show-current 2> /dev/null)
+    set -f git_out (git branch --show-current 2> /dev/null)
     if test $status = 0
+      git diff --quiet 2>/dev/null; or set git_out $git_out"*"
       echo -n (set_color yellow) "("$git_out")"
     end
   end
