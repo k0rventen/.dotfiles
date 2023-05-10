@@ -5,6 +5,7 @@ set -xg EDITOR nano
 # very short aliases
 alias k 'kubectl'
 alias p 'python3'
+alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
 alias h 'hey_gpt'
@@ -57,7 +58,7 @@ dotfiles config --local status.showUntrackedFiles no
 # to set the key, set -U OPENAI_KEY <KEY>
 # needs httpie and jq
 if command -q https -a command -q jq
-  function hey_gpt
+  function hey_gpt --description "talk to gpt"
       set prompt (echo $argv | string join ' ')
       set gpt (https -b post api.openai.com/v1/chat/completions \
                   "Authorization: Bearer $OPENAI_KEY" \
@@ -77,29 +78,41 @@ if command -q https -a command -q jq
   end
 end
 
-# functions
-function bdec
+# decode b64 from stdin
+function bdec 
   printf "$argv" | base64 -d
 end
 
-function benc
+# encode to b64 from stdin
+function benc 
   printf "$argv" | base64 
 end
 
+# create a random hex of len $argv
 function rand_token
   openssl rand -hex $argv | cut -c 1-$argv
 end
 
-
-if command -q git
-  function git_prompt
-    set git_out (git branch --show-current 2> /dev/null)
-    if test $status = 0
-      echo -n (set_color yellow) "("$git_out")"
-    end
+# like watch -n2, but herits from aliases, functions and env vars
+function repeat
+  echo -e "Running '$argv' continuously at 2s interval. 2x Ctrl+C to quit."
+  sleep 2
+  while :
+    $argv
+    sleep 2
   end
-else
-  function git_prompt
+end
+
+# run a command for each line from stdin. use placeholder {} in command, eg.  cat file | foreach echo 'hey {}' 
+function foreach
+  string match '*{}*' $argv > /dev/null
+  if test $status != 0
+    echo "missing {} in argument"
+    return
+  end
+  while read line
+    set cmd (string replace "{}" "$line" "$argv")
+    eval $cmd
   end
 end
 
@@ -113,6 +126,8 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
     set -U OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
     set -gx KUBECONFIG $OG_KUBECONFIG
   end
+
+  # per session kube context switcher
   function kctx
     if count $argv > /dev/null
       # find the file that contains the context
@@ -133,7 +148,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
     end 
   end
 
-
+  # namespace switcher
   function kns
     if count $argv > /dev/null
       kubectl config set-context --current --namespace $argv
@@ -142,13 +157,29 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
     end
   end
 
+
   function kube_prompt
     echo -n (set_color cyan) "["(yq '.current-context as $currctx | .contexts.[] | select(.name== $currctx) | (.name + ":" + .context.namespace)' < $KUBECONFIG)"]"
   end
+
+  # autocompletion
   complete -c kctx -f -a "(KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config get-contexts -o name)"
   complete -c kns -f -a "(kubectl get ns -o custom-columns=name:metadata.name --no-headers)"
 else
   function kube_prompt
+  end
+end
+
+
+if command -q git
+  function git_prompt
+    set git_out (git branch --show-current 2> /dev/null)
+    if test $status = 0
+      echo -n (set_color yellow) "("$git_out")"
+    end
+  end
+else
+  function git_prompt
   end
 end
 
