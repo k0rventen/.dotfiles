@@ -15,12 +15,13 @@ alias s 'skaffold'
 # short aliases
 alias kp 'kubectl port-forward'
 alias kl 'kubectl logs'
+alias ky 'kubectl --output=yaml'
 alias gs 'git status'
 alias ga 'git add'
 alias gc 'git commit -m'
 alias gp 'git push'
 alias gd 'git diff'
-
+alias dc 'docker compose'
 
 # colors
 set -U fish_color_autosuggestion e4e4e4
@@ -55,9 +56,8 @@ dotfiles config --local status.showUntrackedFiles no
 
 
 # https://kadekillary.work/posts/1000x-eng/
-# to set the key, set -U OPENAI_KEY <KEY>
-# needs httpie and jq
-if command -q https; and command -q jq
+# needs set -U OPENAI_KEY <KEY>
+if command -q https; and command -q yq
   alias h 'hey_gpt'
   function hey_gpt --description "talk to gpt"
       set prompt (echo $argv | string join ' ')
@@ -70,10 +70,8 @@ if command -q https; and command -q jq
       for chunk in $gpt
           if test $chunk = 'data: [DONE]'
               break
-          else if string match -q --regex "role" $chunk
-              continue
           else if string match -q --regex "content" $chunk
-              echo -n $chunk | string replace 'data: ' '' | jq -r -j '.choices[0].delta.content'
+              yq -0 '.choices[0].delta.content' < (echo -n $chunk | string replace 'data: ' '' | psub)
           end
       end
   end
