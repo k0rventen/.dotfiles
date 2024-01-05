@@ -12,7 +12,7 @@ alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
 alias s 'skaffold'
-
+alias a 'argocd --grpc-web'
 
 # short aliases
 alias kp 'kubectl port-forward'
