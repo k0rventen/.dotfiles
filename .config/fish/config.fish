@@ -93,7 +93,7 @@ end
 
 # create a random hex of len $argv
 function rand_token
-  openssl rand -hex $argv | cut -c 1-$argv
+  cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv
 end
 
 # like watch -n2, but herits from aliases, functions and env vars
@@ -127,7 +127,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
   if test -n "$OG_KUBECONFIG"
     set -gx KUBECONFIG $OG_KUBECONFIG
   else
-    set -U OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
+    set -Ux OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
     set -gx KUBECONFIG $OG_KUBECONFIG
   end
 
@@ -140,7 +140,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
         if test $status = 0
           echo "Found matching context in $config"
           set -gx KUBECONFIG $config
-          set -U OG_KUBECONFIG $config
+          set -Ux OG_KUBECONFIG $config
           kubectl config use-context $argv
           return
         end
