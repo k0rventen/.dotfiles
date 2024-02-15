@@ -1,0 +1,20 @@
+{
+    "workbench.colorTheme": "Catppuccin Frappé",
+    "workbench.iconTheme": "catppuccin-frappe",
+    "editor.fontFamily": "'Fira Code','Droid Sans Mono', 'monospace', monospace",
+    "telemetry.telemetryLevel": "off",
+    "window.menuBarVisibility": "compact",
+    "terminal.integrated.tabs.enabled": false,
+    "editor.minimap.enabled": false,
+    "explorer.confirmDragAndDrop": false,
+    "explorer.confirmDelete": false,
+    "extensions.ignoreRecommendations": true,
+    "workbench.startupEditor": "none",
+    "editor.cursorBlinking": "smooth",
+    "editor.scrollbar.horizontalScrollbarSize": 10,
+    "editor.scrollbar.verticalScrollbarSize": 10,
+    "window.dialogStyle": "custom",
+    "window.titleBarStyle": "custom",
+    "workbench.layoutControl.enabled": false,
+    "window.commandCenter": false
+}
