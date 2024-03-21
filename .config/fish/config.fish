@@ -4,6 +4,7 @@ set -xg EDITOR nano
 set -xg LSCOLORS gxfxcxdxbxegedabagacad
 set -xg LS_COLORS 'di=36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43'
 set -xg TERM xterm
+set -xg HOMEBREW_NO_AUTO_UPDATE 1
 
 # very short aliases
 alias k 'kubectl'
@@ -56,28 +57,14 @@ set -U fish_color_valid_path --underline
 
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-dotfiles config --local status.showUntrackedFiles no
 
 
-# https://kadekillary.work/posts/1000x-eng/
-# needs set -U OPENAI_KEY <KEY>
-if command -q https; and command -q yq
-  alias h 'hey_gpt'
-  function hey_gpt --description "talk to gpt"
-      set prompt (echo $argv | string join ' ')
-      set gpt (https -b post api.openai.com/v1/chat/completions \
-                  "Authorization: Bearer $OPENAI_KEY" \
-                  model=gpt-3.5-turbo \
-                  temperature:=0.25 \
-                  stream:=true \
-                  messages:='[{"role": "user", "content": "'$prompt'"}]')
-      for chunk in $gpt
-          if test $chunk = 'data: [DONE]'
-              break
-          else if string match -q --regex "content" $chunk
-              yq -0 '.choices[0].delta.content' < (echo -n $chunk | string replace 'data: ' '' | psub)
-          end
-      end
+# inspired by https://kadekillary.work/posts/1000x-eng/
+# but runs locally using ollama on port 11434
+if command -q ollama
+  alias h 'help_me'
+  function help_me --description "talk to ollama"
+      ollama run devops "$argv"
   end
 end
 
