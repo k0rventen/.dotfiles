@@ -58,6 +58,12 @@ set -U fish_color_valid_path --underline
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 
+# bitwarden related config
+if command -q bw
+  function bwget
+    NODE_NO_WARNINGS=1 bw list items --search "$argv" | jq '.[] | .name + " -> " + .login.username +" / "+ .login.password'
+  end
+end
 
 # inspired by https://kadekillary.work/posts/1000x-eng/
 # but runs locally using ollama on port 11434
