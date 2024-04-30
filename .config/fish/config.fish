@@ -21,12 +21,20 @@ alias kp 'kubectl port-forward'
 alias kl 'kubectl logs'
 alias ky 'kubectl --output=yaml'
 alias kj 'kubectl --output=json'
+alias dc 'docker compose'
+
+# git aliases
 alias gs 'git status'
 alias ga 'git add'
+alias gu 'git restore --staged'
 alias gc 'git commit -m'
 alias gp 'git push'
 alias gd 'git diff'
-alias dc 'docker compose'
+
+function gb
+  git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
+end
+complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
 
 # colors
 set -U fish_color_autosuggestion e4e4e4
@@ -57,13 +65,6 @@ set -U fish_color_valid_path --underline
 
 # dotfiles setup 
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-
-# bitwarden related config
-if command -q bw
-  function bwget
-    NODE_NO_WARNINGS=1 bw list items --search "$argv" | jq '.[] | .name + " -> " + .login.username +" / "+ .login.password'
-  end
-end
 
 # inspired by https://kadekillary.work/posts/1000x-eng/
 # but runs locally using ollama on port 11434
