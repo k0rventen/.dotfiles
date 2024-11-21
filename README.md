@@ -1,6 +1,6 @@
 # dotfiles
 
-dotfiles repo using a bare git repo
+dotfiles using a bare git repo
 
 ## deploy on a sh-able machine
 
@@ -10,7 +10,7 @@ _(you'll need at least curl and git)_
 curl -sfL https://raw.githubusercontent.com/k0rventen/.dotfiles/main/.config/setup.sh | sh
 ```
 
-This will clone the repo with the right options, and `checkout -f`.
+This will clone the repo in `$HOME` with the right options, and `checkout -f`.
 __Any previous files that overlap will be overwritten !__
 
 
@@ -38,30 +38,17 @@ It can be decomposed as follows:
   - `bdec`, `benc`: for encoding/decoding b64 payloads
 - `kctx` & `kns` : functions that lists/changes your kube contexts/ns for __this__ fish session, allowing you to have different contexts on
   other sessions
-- `hey_gpt` function for interacting with ChatGPT from the commandline
+- `h` function for interacting with my ollama model from the commandline
 - `watch` & `repeat`: simpler version of watch & xargs.
 
 Demo:
 
 ```
-✓ 7s mac-pro:~ [local-qemu:app]
-> hey_gpt write a short poem about kubernetes
-Kubernetes, oh Kubernetes
-A master of orchestration
-Scaling apps with ease and grace
-In the cloud, a true sensation
+✓ mac-pro:~ [local-qemu:app]
+> h how to tar a folder with gz
+`tar -czf output.tar.gz folder_name`
 
-From pods to nodes, it manages all
-A container's best friend
-With automation and control
-It keeps our workloads in trend
-
-A tool for DevOps, a boon for IT
-Kubernetes, we sing your praise
-With you by our side, we're unstoppable
-In the cloud, we'll forever blaze.
-
-✓ 7s mac-pro:~ [local-qemu:app]
+✓ 5s mac-pro:~ [local-qemu:app]
 > kctx auriga 
 Found matching context in /Users/corentin/.kube/configs/auriga
 Switched to context "auriga".
@@ -79,18 +66,18 @@ Context "auriga" modified.
 These dotfiles are tailored for a *NIX env with the following things installed:
 - fish shell
 - yq & kubectl for the k8s things
-- jq, httpie and an OPENAI API key for `hey_gpt`
+- ollama `help_me / h`
 
 ## other stuff
 
 - htop config
 - httpie config
-- backup script using rsync
+- k9s config
 
 ## usage
 
 On a fish shell, a `dotfiles` alias will be created. It shall be used like a regular git command. 
-Note that a wildcard `*` .gitignore is used, so adding new file will require `-f`. 
+Note that a wildcard `*` gitignore rule is used, so adding new file will require `-f`. 
 
 Here is an example of adding a new file:
 ```
