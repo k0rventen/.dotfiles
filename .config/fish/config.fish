@@ -13,8 +13,7 @@ alias b 'brew'
 alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
-alias s 'skaffold'
-alias a 'argocd --grpc-web'
+
 
 # short aliases
 alias kp 'kubectl port-forward'
@@ -30,6 +29,11 @@ alias gu 'git restore --staged'
 alias gc 'git commit -m'
 alias gp 'git push'
 alias gd 'git diff'
+
+# other aliases
+alias alp 'd run -it -w /data -v .:/data alpine sh'
+alias deb 'd run -it -w /data -v .:/data debian sh'
+
 
 function gb
   git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
