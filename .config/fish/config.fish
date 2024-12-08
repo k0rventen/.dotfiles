@@ -1,18 +1,21 @@
 # envs & path
-set fish_greeting 
+set fish_greeting
 set -xg EDITOR nano
 set -xg LSCOLORS gxfxcxdxbxegedabagacad
 set -xg LS_COLORS 'di=36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43'
 set -xg TERM xterm
 set -xg HOMEBREW_NO_AUTO_UPDATE 1
 
-# very short aliases
+
+# very short aliases and functions
 alias k 'kubectl'
 alias p 'python3'
 alias b 'brew'
 alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
+function o; count $argv; and open $argv; or open . ;end
+function c; count $argv; and code $argv; or code . ;end
 
 
 # short aliases
@@ -32,7 +35,7 @@ alias gd 'git diff'
 
 # other aliases
 alias alp 'd run -it -w /data -v .:/data alpine sh'
-alias deb 'd run -it -w /data -v .:/data debian sh'
+alias deb 'd run -it -w /data -v .:/data debian bash'
 
 
 function gb
@@ -71,10 +74,9 @@ set -U fish_color_valid_path --underline
 alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 
 # inspired by https://kadekillary.work/posts/1000x-eng/
-# but runs locally using ollama on port 11434
+# but runs locally using ollama
 if command -q ollama
-  alias h 'help_me'
-  function help_me --description "talk to ollama"
+  function h --description "talk to your sidekick engineer"
       ollama run devops "$argv"
   end
 end
@@ -97,8 +99,7 @@ end
 
 # like watch -n2, but herits from aliases, functions and env vars
 function repeat
-  echo -e "Running '$argv' continuously at 2s interval. 2x Ctrl+C to quit."
-  sleep 2
+  echo -e "Running '$argv' continuously at 2s interval."
   while :
     eval $argv
     sleep 2
