@@ -1,0 +1,147 @@
+---
+- name: Configure setup
+  hosts: localhost
+  vars:
+    upgrade: false
+    is_desktop: true
+    homebrew_packages:
+      - fish
+      - jq
+      - tmux
+      - htop
+      - k9s
+      - restic
+    flatpak_apps:
+      - io.github.zen_browser.zen
+      - com.ultimaker.cura
+      - com.valvesoftware.Steam
+      - com.discordapp.Discord
+      - org.openscad.OpenSCAD
+      - org.gnome.Boxes
+
+
+  tasks:
+    - name: Update the package cache
+      become: true
+      apt:
+        update_cache: yes
+
+    - name: Ensure git and curl are installed
+      become: true
+      apt:
+        name:
+          - git
+          - curl
+        state: present
+
+    - name: Install Homebrew and Flatpak
+      block:
+        - name: Install Homebrew
+          shell: |
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          args:
+            creates: /home/linuxbrew/.linuxbrew/bin/brew
+
+        - name: Install Flatpak
+          become: true
+          apt:
+            name: flatpak
+            state: present
+        - name: check flatpak repos
+          command: flatpak remotes
+          register: flatpak_remotes
+        - name: Add Flathub repository
+          shell: |
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          when: "'flathub' not in flatpak_remotes.stdout"
+      when: is_desktop
+    - name: Install fish shell if this is a server
+      become: true
+      apt:
+        name: fish
+        state: present
+      when: not is_desktop
+
+    - name: Install Ollama using the official script
+      shell: |
+        curl -fsSL https://ollama.com/install.sh | bash
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/ollama
+      when: is_desktop
+    - name: Install Docker using the official script
+      shell: |
+        curl -fsSL https://get.docker.com | bash
+      args:
+        creates: /usr/bin/docker
+      register: docker_install
+
+    - name: Add current user to the Docker group
+      become: true
+      user:
+        name: "{{ lookup('env', 'USER') }}"
+        groups: docker
+        append: true
+
+    - name: Install Homebrew packages
+      shell: |
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
+        brew install {{ item }}
+      with_items: "{{ homebrew_packages }}"
+      args:
+        creates: /home/linuxbrew/.linuxbrew/bin/{{ item }}
+      register: result
+      failed_when:
+        - '"Error" in result.stderr'
+      when: is_desktop
+
+    - name: Install Flatpak applications
+      with_items: "{{ flatpak_apps }}"
+      shell: |
+        flatpak install -y flathub {{ item }}
+      args:
+        creates: "{{ lookup('env', 'HOME') }}/.var/app/{{ item }}"
+      when: is_desktop
+
+    - name: Install dotfiles
+      shell: |
+        curl -sfL https://raw.githubusercontent.com/k0rventen/.dotfiles/main/.config/setup.sh | sh
+      args:
+        executable: /bin/bash
+        creates: "{{ lookup('env', 'HOME') }}/.dotfiles"
+
+
+    - name: check ollama models
+      command: ollama ls
+      register: ollama_models
+    - name: Build devops IA
+      shell: |
+        ollama create devops -f {{ lookup('env', 'HOME') }}/.config/Modelfile
+      args:
+        executable: /bin/bash
+      when: "'devops' not in ollama_models.stdout"
+
+    - name: set fish as default shell
+      become: true
+      user:
+        name: "{{ lookup('env', 'USER') }}"
+        shell: /home/linuxbrew/.linuxbrew/bin/fish
+
+    - name: Upgrade packages, homebrew and flatpaks
+      when: upgrade
+      block:
+      - name: Upgrade apt packages
+        become: true
+        apt:
+          upgrade: dist
+      - name: Update homebrew
+        shell: |
+          brew update && brew upgrade
+
+      - name: Update flatpaks
+        shell: |
+          flatpak update
+        register: flatpak_out
+      - name: show
+        debug:
+          msg: "{{ flatpak_out.stdout_lines }}"
