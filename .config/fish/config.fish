@@ -71,7 +71,11 @@ set -U fish_color_user brgreen
 set -U fish_color_valid_path --underline
 
 # dotfiles setup 
-alias dotfiles "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias dots "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+if command -q ansible-playbook
+  alias config "ANSIBLE_LOCALHOST_WARNING=False ANSIBLE_INVENTORY_UNPARSED_WARNING=False ansible-playbook $HOME/.config/config.yaml -K"
+  alias config-upgrade "config -e upgrade=true"
+end
 
 # inspired by https://kadekillary.work/posts/1000x-eng/
 # but runs locally using ollama

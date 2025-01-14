@@ -1,24 +1,17 @@
 ---
 - name: Configure setup
   hosts: localhost
+
+  # default config, can be overriden by setting envs in vars.yaml
   vars:
     upgrade: false
-    is_desktop: true
-    homebrew_packages:
-      - fish
-      - jq
-      - tmux
-      - htop
-      - k9s
-      - restic
-    flatpak_apps:
-      - io.github.zen_browser.zen
-      - com.ultimaker.cura
-      - com.valvesoftware.Steam
-      - com.discordapp.Discord
-      - org.openscad.OpenSCAD
-      - org.gnome.Boxes
+    docker: false
+    ollama: false
 
+    homebrew_packages: []
+    flatpak_apps: []
+    var_files:
+    - "/home/{{ lookup('env', 'HOME') }}/.config/vars.yaml"
 
   tasks:
     - name: Update the package cache
@@ -26,16 +19,17 @@
       apt:
         update_cache: yes
 
-    - name: Ensure git and curl are installed
-      become: true
-      apt:
-        name:
-          - git
-          - curl
-        state: present
+
 
     - name: Install Homebrew and Flatpak
       block:
+        - name: Ensure git and curl are installed
+          become: true
+          apt:
+            name:
+              - git
+              - curl
+            state: present
         - name: Install Homebrew
           shell: |
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -54,13 +48,6 @@
           shell: |
             flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           when: "'flathub' not in flatpak_remotes.stdout"
-      when: is_desktop
-    - name: Install fish shell if this is a server
-      become: true
-      apt:
-        name: fish
-        state: present
-      when: not is_desktop
 
     - name: Install Ollama using the official script
       shell: |
@@ -68,13 +55,14 @@
       args:
         executable: /bin/bash
         creates: /usr/local/bin/ollama
-      when: is_desktop
+      when: ollama
+
     - name: Install Docker using the official script
       shell: |
         curl -fsSL https://get.docker.com | bash
       args:
         creates: /usr/bin/docker
-      register: docker_install
+      when: docker
 
     - name: Add current user to the Docker group
       become: true
@@ -93,7 +81,7 @@
       register: result
       failed_when:
         - '"Error" in result.stderr'
-      when: is_desktop
+
 
     - name: Install Flatpak applications
       with_items: "{{ flatpak_apps }}"
@@ -101,7 +89,6 @@
         flatpak install -y flathub {{ item }}
       args:
         creates: "{{ lookup('env', 'HOME') }}/.var/app/{{ item }}"
-      when: is_desktop
 
     - name: Install dotfiles
       shell: |
@@ -140,7 +127,7 @@
 
       - name: Update flatpaks
         shell: |
-          flatpak update
+          flatpak update -y
         register: flatpak_out
       - name: show
         debug:
