@@ -14,8 +14,9 @@ alias b 'brew'
 alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
-function o; count $argv; and open $argv; or open . ;end
-function c; count $argv; and code $argv; or code . ;end
+alias t 'tmux -c $HOME/.config/tmux.conf'
+function o; count $argv > /dev/null; and open $argv; or open . ;end
+function z; count $argv > /dev/null; and flatpak run dev.zed.Zed -a $argv; or flatpak run dev.zed.Zed -a . ;end
 
 
 # short aliases
@@ -29,19 +30,25 @@ alias dc 'docker compose'
 alias gs 'git status'
 alias ga 'git add'
 alias gu 'git restore --staged'
-alias gc 'git commit -m'
 alias gp 'git push'
 alias gd 'git diff'
 
-# other aliases
-alias alp 'd run -it -w /data -v .:/data alpine sh'
-alias deb 'd run -it -w /data -v .:/data debian bash'
 
+function gc
+    count $argv > /dev/null; and git commit -m "$argv"; or git commit --amend --no-edit .
+end
 
 function gb
   git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
 end
 complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
+
+
+# quick containers
+alias alp 'd run -it -w /data -v .:/data alpine sh'
+alias deb 'd run -it -w /data -v .:/data debian bash'
+
+
 
 # colors
 set -U fish_color_autosuggestion e4e4e4
@@ -69,8 +76,15 @@ set -U fish_color_selection --background=FFCC66
 set -U fish_color_status red
 set -U fish_color_user brgreen
 set -U fish_color_valid_path --underline
+# git prompt setup
+set -g __fish_git_prompt_show_informative_status 1
+set -g __fish_git_prompt_char_dirtystate '*'
+set -g __fish_git_prompt_char_stagedstate '+'
+set -g __fish_git_prompt_char_stashstate '$'
+set -g __fish_git_prompt_char_untrackedfiles '%'
+set -g __fish_git_prompt_char_cleanstate '='
 
-# dotfiles setup 
+# dotfiles setup
 alias dots "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 if command -q ansible-playbook
   alias config "ANSIBLE_LOCALHOST_WARNING=False ANSIBLE_INVENTORY_UNPARSED_WARNING=False ansible-playbook $HOME/.config/config.yaml -K"
@@ -87,13 +101,13 @@ end
 
 
 # decode b64 from stdin
-function bdec 
+function bdec
   printf "$argv" | base64 -d
 end
 
 # encode to b64 from stdin
-function benc 
-  printf "$argv" | base64 
+function benc
+  printf "$argv" | base64
 end
 
 # create a random hex of len $argv
@@ -110,7 +124,7 @@ function repeat
   end
 end
 
-# run a command for each line from stdin. use placeholder {} in command, eg.  cat file | foreach echo 'hey {}' 
+# run a command for each line from stdin. use placeholder {} in command, eg.  cat file | foreach echo 'hey {}'
 function foreach
   string match '*{}*' $argv > /dev/null
   if test $status != 0
@@ -123,7 +137,32 @@ function foreach
   end
 end
 
+# automatically runs sudo -i right after login
+function sshu
+  set ssh_target $argv
+  set psswd (read -s -P "ssh password:")
+  set expect_tmpl '''
+    set timeout 5
+    # ssh to the target
+    spawn ssh __ssh_target__
 
+    # enter ssh password
+    expect "password:"
+    send "__ssh_pass__\r"
+
+    # w8 for login banner and prompt
+    expect  -re ".*"
+    sleep 0.5
+    # re enter password for sudo if necessary
+    send "sudo -i\r"
+    expect {
+            "password for" {send "__ssh_pass__\r";interact}
+            -re ".*" interact
+    }
+   '''
+  expect -f (string replace -a __ssh_pass__ $psswd (string replace __ssh_target__ $argv $expect_tmpl) | psub)
+
+end
 
 # Kubernetes related functions and prompt. Only active if required binaries and files are present
 if test -d ~/.kube/configs && command -q yq && command -q kubectl
@@ -150,10 +189,10 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
         end
       end
       echo 'No matching context found.'
-    else 
+    else
       # print out all the contexts
-      KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config get-contexts -o name 
-    end 
+      KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config get-contexts -o name
+    end
   end
 
   # namespace switcher
@@ -180,34 +219,20 @@ else
 end
 
 
-if command -q git
-  # shows <branch> with * if dirty
-  function git_prompt
-    set -f git_out (git branch --show-current 2> /dev/null)
-    if test $status = 0
-      git diff --quiet 2>/dev/null; or set git_out $git_out"*"
-      echo -n (set_color yellow) "("$git_out")"
-    end
-  end
-else
-  function git_prompt
-  end
-end
-
 function home_prompt
   echo -n (set_color magenta) (prompt_hostname)":"(prompt_pwd)
 end
 
 function command_prompt
-  # previous command status + time taken if > 1s
+  # previous command status + time taken if > 1s < 1h
   if test $status = 0
     set -f time_str "\n$(set_color green)✓"
   else
     set -f time_str "\n$(set_color red)✗"
   end
   if test $CMD_DURATION -gt 1000 -a $CMD_DURATION -lt 3600000
-    set --local secs (math -s0 $CMD_DURATION/1000 % 60)
-    set --local mins (math -s0 $CMD_DURATION/60000 % 60)
+    set -l secs (math -s0 $CMD_DURATION/1000 % 60)
+    set -l mins (math -s0 $CMD_DURATION/60000 % 60)
     set time_str $time_str" "
     test $mins -gt 0 && set time_str $time_str$mins"m"
     test $secs -gt 0 && set time_str $time_str$secs"s"
@@ -220,8 +245,8 @@ end
 # prompt
 function fish_prompt
   command_prompt
-  home_prompt  
+  home_prompt
   kube_prompt
-  git_prompt
+  fish_git_prompt
   echo -e (set_color normal)"\n> "
 end
