@@ -14,7 +14,7 @@ alias b 'brew'
 alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
-alias t 'tmux -c $HOME/.config/tmux.conf'
+alias t 'tmux -f ~/.config/tmux.conf'
 function o; count $argv > /dev/null; and open $argv; or open . ;end
 function z; count $argv > /dev/null; and flatpak run dev.zed.Zed -a $argv; or flatpak run dev.zed.Zed -a . ;end
 
@@ -33,15 +33,15 @@ alias gu 'git restore --staged'
 alias gp 'git push'
 alias gd 'git diff'
 
+function gb
+  git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
+end
+complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
 
 function gc
     count $argv > /dev/null; and git commit -m "$argv"; or git commit --amend --no-edit .
 end
 
-function gb
-  git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
-end
-complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
 
 
 # quick containers
@@ -242,8 +242,20 @@ function command_prompt
 end
 
 
+# automatic repaint of the prompt
+# function __trigger_prompt_sync --on-event fish_prompt
+#   set -U __prompt_sync (date)
+# end
+
+# function __prompt_sync --on-variable __prompt_sync
+#   test (date) = $__prompt_sync; or return
+#   commandline -f repaint
+# end
+
+
 # prompt
 function fish_prompt
+  history merge
   command_prompt
   home_prompt
   kube_prompt
