@@ -15,9 +15,10 @@ alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
 alias t 'tmux -c $HOME/.config/tmux.conf'
+
 function o; count $argv > /dev/null; and open $argv; or open . ;end
 function z; count $argv > /dev/null; and flatpak run dev.zed.Zed -a $argv; or flatpak run dev.zed.Zed -a . ;end
-
+function c; count $argv > /dev/null; and code $argv; or code . ;end
 
 # short aliases
 alias kp 'kubectl port-forward'
@@ -99,6 +100,9 @@ if command -q ollama
   end
 end
 
+if command -q gomi
+  alias rm gomi
+end
 
 # decode b64 from stdin
 function bdec
@@ -137,32 +141,10 @@ function foreach
   end
 end
 
-# automatically runs sudo -i right after login
-function sshu
-  set ssh_target $argv
-  set psswd (read -s -P "ssh password:")
-  set expect_tmpl '''
-    set timeout 5
-    # ssh to the target
-    spawn ssh __ssh_target__
-
-    # enter ssh password
-    expect "password:"
-    send "__ssh_pass__\r"
-
-    # w8 for login banner and prompt
-    expect  -re ".*"
-    sleep 0.5
-    # re enter password for sudo if necessary
-    send "sudo -i\r"
-    expect {
-            "password for" {send "__ssh_pass__\r";interact}
-            -re ".*" interact
-    }
-   '''
-  expect -f (string replace -a __ssh_pass__ $psswd (string replace __ssh_target__ $argv $expect_tmpl) | psub)
-
+function kdec 
+  kubectl get secrets $argv --template='{{ range $key, $value := .data }}{{ printf "%s: %s\n" $key ($value | base64decode) }}{{ end }}'
 end
+complete -c kdec -f -a "(kubectl get secret -o custom-columns=name:metadata.name --no-headers)"
 
 # Kubernetes related functions and prompt. Only active if required binaries and files are present
 if test -d ~/.kube/configs && command -q yq && command -q kubectl
@@ -204,6 +186,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
     end
   end
 
+
   # prompt showing context:namespace
   function kube_prompt
     echo -n (set_color cyan) "["(yq '.current-context as $currctx | .contexts.[] | select(.name== $currctx) | (.name + ":" + .context.namespace)' < $KUBECONFIG)"]"
@@ -217,6 +200,7 @@ else
   function kube_prompt
   end
 end
+
 
 
 function home_prompt
@@ -240,6 +224,7 @@ function command_prompt
   end
   echo -ne $time_str
 end
+
 
 
 # prompt
