@@ -1,101 +1,101 @@
-# https://github.com/catppuccin/k9s/blob/main/dist/catppuccin-frappe-transparent.yaml
+# https://github.com/catppuccin/k9s/blob/main/dist/catppuccin-macchiato-transparent.yaml
 k9s:
   body:
-    fgColor: '#c6d0f5'
+    fgColor: '#cad3f5'
     bgColor: default
-    logoColor: '#ca9ee6'
+    logoColor: '#c6a0f6'
   prompt:
-    fgColor: '#c6d0f5'
+    fgColor: '#cad3f5'
     bgColor: default
-    suggestColor: '#8caaee'
+    suggestColor: '#8aadf4'
   help:
-    fgColor: '#c6d0f5'
+    fgColor: '#cad3f5'
     bgColor: default
-    sectionColor: '#a6d189'
-    keyColor: '#8caaee'
-    numKeyColor: '#ea999c'
+    sectionColor: '#a6da95'
+    keyColor: '#8aadf4'
+    numKeyColor: '#ee99a0'
   frame:
     title:
-      fgColor: '#81c8be'
+      fgColor: '#8bd5ca'
       bgColor: default
-      highlightColor: '#f4b8e4'
-      counterColor: '#e5c890'
-      filterColor: '#a6d189'
+      highlightColor: '#f5bde6'
+      counterColor: '#eed49f'
+      filterColor: '#a6da95'
     border:
-      fgColor: '#ca9ee6'
-      focusColor: '#babbf1'
+      fgColor: '#c6a0f6'
+      focusColor: '#b7bdf8'
     menu:
-      fgColor: '#c6d0f5'
-      keyColor: '#8caaee'
-      numKeyColor: '#ea999c'
+      fgColor: '#cad3f5'
+      keyColor: '#8aadf4'
+      numKeyColor: '#ee99a0'
     crumbs:
-      fgColor: '#303446'
+      fgColor: '#24273a'
       bgColor: default
-      activeColor: '#eebebe'
+      activeColor: '#f0c6c6'
     status:
-      newColor: '#8caaee'
-      modifyColor: '#babbf1'
-      addColor: '#a6d189'
-      pendingColor: '#ef9f76'
-      errorColor: '#e78284'
-      highlightColor: '#99d1db'
-      killColor: '#ca9ee6'
-      completedColor: '#737994'
+      newColor: '#8aadf4'
+      modifyColor: '#b7bdf8'
+      addColor: '#a6da95'
+      pendingColor: '#f5a97f'
+      errorColor: '#ed8796'
+      highlightColor: '#91d7e3'
+      killColor: '#c6a0f6'
+      completedColor: '#6e738d'
   info:
-    fgColor: '#ef9f76'
-    sectionColor: '#c6d0f5'
+    fgColor: '#f5a97f'
+    sectionColor: '#cad3f5'
   views:
     table:
-      fgColor: '#c6d0f5'
+      fgColor: '#cad3f5'
       bgColor: default
-      cursorFgColor: '#414559'
-      cursorBgColor: '#51576d'
-      markColor: '#f2d5cf'
+      cursorFgColor: '#363a4f'
+      cursorBgColor: '#494d64'
+      markColor: '#f4dbd6'
       header:
-        fgColor: '#e5c890'
+        fgColor: '#eed49f'
         bgColor: default
-        sorterColor: '#99d1db'
+        sorterColor: '#91d7e3'
     xray:
-      fgColor: '#c6d0f5'
+      fgColor: '#cad3f5'
       bgColor: default
-      cursorColor: '#51576d'
-      cursorTextColor: '#303446'
-      graphicColor: '#f4b8e4'
+      cursorColor: '#494d64'
+      cursorTextColor: '#24273a'
+      graphicColor: '#f5bde6'
     charts:
       bgColor: default
       chartBgColor: default
       dialBgColor: default
       defaultDialColors:
-        - '#a6d189'
-        - '#e78284'
+        - '#a6da95'
+        - '#ed8796'
       defaultChartColors:
-        - '#a6d189'
-        - '#e78284'
+        - '#a6da95'
+        - '#ed8796'
       resourceColors:
         cpu:
-          - '#ca9ee6'
-          - '#8caaee'
+          - '#c6a0f6'
+          - '#8aadf4'
         mem:
-          - '#e5c890'
-          - '#ef9f76'
+          - '#eed49f'
+          - '#f5a97f'
     yaml:
-      keyColor: '#8caaee'
-      valueColor: '#c6d0f5'
-      colonColor: '#a5adce'
+      keyColor: '#8aadf4'
+      valueColor: '#cad3f5'
+      colonColor: '#a5adcb'
     logs:
-      fgColor: '#c6d0f5'
+      fgColor: '#cad3f5'
       bgColor: default
       indicator:
-        fgColor: '#babbf1'
+        fgColor: '#b7bdf8'
         bgColor: default
-        toggleOnColor: '#a6d189'
-        toggleOffColor: '#a5adce'
+        toggleOnColor: '#a6da95'
+        toggleOffColor: '#a5adcb'
   dialog:
-    fgColor: '#e5c890'
+    fgColor: '#eed49f'
     bgColor: default
-    buttonFgColor: '#303446'
+    buttonFgColor: '#24273a'
     buttonBgColor: default
-    buttonFocusFgColor: '#303446'
-    buttonFocusBgColor: '#f4b8e4'
-    labelFgColor: '#f2d5cf'
-    fieldFgColor: '#c6d0f5'
+    buttonFocusFgColor: '#24273a'
+    buttonFocusBgColor: '#f5bde6'
+    labelFgColor: '#f4dbd6'
+    fieldFgColor: '#cad3f5'

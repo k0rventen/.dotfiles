@@ -1,7 +1,10 @@
 aliases:
-  dp: apps/v1/deployments
-  sec: v1/secrets
+  d: apps/v1/deployments
+  p: v1/pods
+  sc: v1/secrets
+  sv: v1/services
   jo: batch/v1/jobs
+  cj: batch/v1/cronjobs
   cr: rbac.authorization.k8s.io/v1/clusterroles
   crb: rbac.authorization.k8s.io/v1/clusterrolebindings
   ro: rbac.authorization.k8s.io/v1/roles
