@@ -19,4 +19,6 @@
     "editor.smoothScrolling": true,
     "workbench.list.smoothScrolling": true,
     "extensions.ignoreRecommendations": true,
+    "update.showReleaseNotes": false,
+    "explorer.confirmDragAndDrop": false
 }
