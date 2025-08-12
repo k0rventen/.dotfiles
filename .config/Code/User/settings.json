@@ -20,5 +20,7 @@
     "workbench.list.smoothScrolling": true,
     "extensions.ignoreRecommendations": true,
     "update.showReleaseNotes": false,
-    "explorer.confirmDragAndDrop": false
+    "explorer.confirmDragAndDrop": false,
+    "chatgpt.gpt3.provider": "Ollama",
+    "terminal.integrated.shellIntegration.decorationsEnabled": "never",
 }
