@@ -5,9 +5,35 @@ plugins:
     dangerous: true
     scopes:
       - containers
-    command: bash
+    command: sh
     background: false
     confirm: true
     args:
       - -c
-      - "kubectl debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=alpine:3.20 --share-processes -- sh"
+      - "kubectl debug -it --context $CONTEXT -n=$NAMESPACE $POD --target=$NAME --image=alpine:3.22 --share-processes -- sh"
+
+  alpine-pod:
+    shortCut: Shift-E
+    confirm: true
+    description: Launch a alpine pod 
+    scopes:
+      - pods
+    command: sh
+    background: false
+    args:
+      - -c
+      - "kubectl run -it --context $CONTEXT -n=$NAMESPACE --image=alpine:3.22 alpine-pod-$(openssl rand -hex 2) -- sh"
+
+
+  openssl-infos:
+    shortCut: o
+    confirm: false
+    description: Get certificate infos
+    scopes:
+      - secrets
+    command: sh
+    background: false
+    args:
+      - -c
+      - kubectl get secret --context $CONTEXT -n $NAMESPACE $NAME -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -noout -text -dates | less
+
