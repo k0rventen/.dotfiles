@@ -1,5 +1,4 @@
-# envs & path
-set fish_greeting
+# envs 
 set -xg EDITOR nano
 set -xg LSCOLORS gxfxcxdxbxegedabagacad
 set -xg LS_COLORS 'di=36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43'
@@ -7,7 +6,7 @@ set -xg TERM xterm
 set -xg HOMEBREW_NO_AUTO_UPDATE 1
 
 
-# very short aliases and functions
+# single-letter aliases, abbr and functions
 alias k 'kubectl'
 alias p 'python3'
 alias b 'brew'
@@ -15,39 +14,35 @@ alias d 'docker'
 alias g 'git'
 alias n 'k9s --headless --crumbsless'
 alias t 'tmux -f ~/.config/tmux.conf'
+abbr u 'sudo apt update && sudo apt upgrade && brew update && brew upgrade && flatpak update'
 function o; count $argv > /dev/null; and open $argv; or open . ;end
 function z; count $argv > /dev/null; and flatpak run dev.zed.Zed -a $argv; or flatpak run dev.zed.Zed -a . ;end
 function c; count $argv > /dev/null; and code $argv; or code . ;end
 
-# short aliases
-alias kp 'kubectl port-forward'
-alias kl 'kubectl logs'
-alias ky 'kubectl --output=yaml'
-alias kj 'kubectl --output=json'
-alias dc 'docker compose'
 
-# git aliases
-alias gs 'git status'
-alias ga 'git add'
-alias gu 'git restore --staged'
-alias gp 'git push'
-alias gd 'git diff'
+# very frequently used abbr
+abbr kp kubectl port-forward
+abbr kl kubectl logs
+abbr --command={k,kubectl} -- y -o=yaml
+abbr --command={k,kubectl} -- j -o=json
+abbr dc docker compose
+abbr gs git status
+abbr ga git add
+abbr gu git restore --staged
+abbr gp git push
+abbr gd git diff
+abbr gc --set-cursor='%' -- 'git commit -m "%"'
+
 
 function gb
-  git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
+  git fetch && git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
 end
 complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
-
-function gc
-    count $argv > /dev/null; and git commit -m "$argv"; or git commit --amend --no-edit .
-end
-
 
 
 # quick containers
 alias alp 'd run -it -w /data -v .:/data alpine sh'
 alias deb 'd run -it -w /data -v .:/data debian bash'
-
 
 
 # colors
@@ -86,10 +81,6 @@ set -g __fish_git_prompt_char_cleanstate '='
 
 # dotfiles setup
 alias dots "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
-if command -q ansible-playbook
-  alias config "ANSIBLE_LOCALHOST_WARNING=False ANSIBLE_INVENTORY_UNPARSED_WARNING=False ansible-playbook $HOME/.config/config.yaml -K"
-  alias config-upgrade "config -e upgrade=true"
-end
 
 # inspired by https://kadekillary.work/posts/1000x-eng/
 # but runs locally using ollama
@@ -103,6 +94,7 @@ if command -q gomi
   alias rm gomi
 end
 
+
 # decode b64 from stdin
 function bdec
   printf "$argv" | base64 -d
@@ -110,17 +102,16 @@ end
 
 # encode to b64 from stdin
 function benc
-  printf "$argv" | base64
+  echo (printf "$argv" | base64 -w0)
 end
 
 # create a random hex of len $argv
 function rand_token
-  cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv
+  echo (cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv)
 end
 
 # like watch -n2, but herits from aliases, functions and env vars
 function repeat
-  echo -e "Running '$argv' continuously at 2s interval."
   while :
     eval $argv
     sleep 2
@@ -195,7 +186,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
   complete -c kctx -f -a "(KUBECONFIG=(find ~/.kube/configs -type f | paste -d: -s -) kubectl config get-contexts -o name)"
   complete -c kns -f -a "(kubectl get ns -o custom-columns=name:metadata.name --no-headers)"
 else
-  # empyt func if not kubectl
+  # empyt func if no kubectl
   function kube_prompt
   end
 end
@@ -236,9 +227,12 @@ end
 # end
 
 
+status is-interactive; and atuin init fish --disable-up-arrow | source
+
+set fish_greeting
+
 # prompt
 function fish_prompt
-  history merge
   command_prompt
   home_prompt
   kube_prompt
