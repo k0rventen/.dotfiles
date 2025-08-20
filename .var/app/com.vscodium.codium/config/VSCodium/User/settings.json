@@ -1,0 +1,26 @@
+{
+    "terminal.integrated.defaultProfile.linux": "fish",
+    "terminal.integrated.profiles.linux": {
+      "fish": {
+        "path": "/app/bin/host-spawn",
+        "args": ["/home/linuxbrew/.linuxbrew/bin/fish"],
+        "icon": "terminal-bash",
+        "overrideName": true
+      }
+    },
+    "workbench.statusBar.visible": false,
+    "workbench.colorTheme": "Catppuccin Macchiato",
+    "workbench.iconTheme": "catppuccin-macchiato",
+    "workbench.startupEditor": "none",
+    "editor.minimap.enabled": false,
+    "workbench.navigationControl.enabled": false,
+    "window.menuBarVisibility": "compact",
+    "editor.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true,
+    "extensions.ignoreRecommendations": true,
+    "update.showReleaseNotes": false,
+    "explorer.confirmDragAndDrop": false,
+        "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+        "explorer.confirmDelete": false,
+        "diffEditor.ignoreTrimWhitespace": true,
+}
