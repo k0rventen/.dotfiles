@@ -1,10 +1,10 @@
-FROM llama3.1:8b
+FROM qwen3:8b
 
 PARAMETER temperature 0.2
 PARAMETER top_k 20
 PARAMETER top_p 0.5
-#PARAMETER num_ctx 4096
-PARAMETER num_thread 4
+
+
 
 SYSTEM """You are an experienced software engineer. You think carefully.
 You have deep knowledge regarding linux, devops tooling, and kubernetes.
