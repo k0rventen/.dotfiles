@@ -16,8 +16,7 @@ alias n 'k9s --headless --crumbsless'
 alias t 'tmux -f ~/.config/tmux.conf'
 abbr u 'sudo apt update && sudo apt upgrade && brew update && brew upgrade && flatpak update'
 function o; count $argv > /dev/null; and open $argv; or open . ;end
-function z; count $argv > /dev/null; and flatpak run dev.zed.Zed -a $argv; or flatpak run dev.zed.Zed -a . ;end
-function c; count $argv > /dev/null; and code $argv; or code . ;end
+function c; count $argv > /dev/null; and flatpak run com.vscodium.codium $argv; or flatpak run com.vscodium.codium . ;end
 
 
 # very frequently used abbr
@@ -25,6 +24,9 @@ abbr kp kubectl port-forward
 abbr kl kubectl logs
 abbr --command={k,kubectl} -- y -o=yaml
 abbr --command={k,kubectl} -- j -o=json
+abbr --command={k,kubectl} -- c --dry-run=client
+abbr --command={k,kubectl} -- s --dry-run=server
+
 abbr dc docker compose
 abbr gs git status
 abbr ga git add
