@@ -23,4 +23,25 @@
         "terminal.integrated.shellIntegration.decorationsEnabled": "never",
         "explorer.confirmDelete": false,
         "diffEditor.ignoreTrimWhitespace": true,
+        "roo-cline.allowedCommands": [
+          "git log",
+          "git diff",
+          "git show",
+          "npm test",
+          "npm install",
+          "tsc"
+        ],
+        "roo-cline.deniedCommands": [],
+        "redhat.telemetry.enabled": false,
+        "workbench.activityBar.location": "top",
+        "terminal.integrated.tabs.enabled": false,
+        "[dockercompose]": {
+          "editor.insertSpaces": true,
+          "editor.tabSize": 2,
+          "editor.autoIndent": "advanced",
+          "editor.defaultFormatter": "redhat.vscode-yaml"
+        },
+        "[github-actions-workflow]": {
+          "editor.defaultFormatter": "redhat.vscode-yaml"
+        },
 }
