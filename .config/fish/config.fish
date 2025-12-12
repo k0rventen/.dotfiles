@@ -16,8 +16,13 @@ alias n 'k9s --headless --crumbsless'
 alias t 'tmux -f ~/.config/tmux.conf'
 abbr u 'sudo apt update && sudo apt upgrade && brew update && brew upgrade && flatpak update'
 function o; count $argv > /dev/null; and open $argv; or open . ;end
-function c; count $argv > /dev/null; and flatpak run com.vscodium.codium $argv; or flatpak run com.vscodium.codium . ;end
+function c; count $argv > /dev/null; and flatpak run com.vscodium.codium $argv &> /dev/null; or flatpak run com.vscodium.codium . &> /dev/null;end
 
+
+# use kubecolor is avail 
+if command -q kubecolor
+  function kubectl --wraps kubectl; command kubecolor $argv; end
+end
 
 # very frequently used abbr
 abbr kp kubectl port-forward
@@ -32,8 +37,12 @@ abbr gs git status
 abbr ga git add
 abbr gu git restore --staged
 abbr gp git push
+abbr gpl git pull
 abbr gd git diff
 abbr gc --set-cursor='%' -- 'git commit -m "%"'
+
+# needs wl-clipboard for wayland or xclip on x11
+abbr --position anywhere cc '| fish_clipboard_copy'
 
 
 function gb
@@ -92,6 +101,7 @@ if command -q ollama
   end
 end
 
+# better trash
 if command -q gomi
   alias rm gomi
 end
@@ -109,7 +119,7 @@ end
 
 # create a random hex of len $argv
 function rand_token
-  echo (cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv)
+  cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv
 end
 
 # like watch -n2, but herits from aliases, functions and env vars
@@ -140,15 +150,21 @@ complete -c kdec -f -a "(kubectl get secret -o custom-columns=name:metadata.name
 
 # Kubernetes related functions and prompt. Only active if required binaries and files are present
 if test -d ~/.kube/configs && command -q yq && command -q kubectl
-# initial kubeconfig setup
-  if test -n "$OG_KUBECONFIG"
-    set -gx KUBECONFIG $OG_KUBECONFIG
-  else
-    set -Ux OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
-    set -gx KUBECONFIG $OG_KUBECONFIG
-  end
 
-  # per session kube context switcher
+  # this is a in-house kns and kctx, based on tmp kubeconfig per session
+  # kctx will load a 'reference' kconf and set a tmp file w/ the same content
+  # kns will change both the reference (for new sessions to inherit the ns) and tmp
+
+  # initial kubeconfig setup, 
+  # if no reference that all of the avail kconf
+  set -gx SESSION_KUBECONFIG (mktemp)
+  function delete_session_kubeconfig_when_exit --on-event fish_exit;rm $SESSION_KUBECONFIG; end
+  if not test -n "$OG_KUBECONFIG"
+    set -Ux OG_KUBECONFIG (find ~/.kube/configs -type f | paste -d: -s -)
+  end
+  cat $OG_KUBECONFIG > $SESSION_KUBECONFIG
+  set -gx KUBECONFIG $SESSION_KUBECONFIG
+
   function kctx
     if count $argv > /dev/null
       # find the file that contains the context
@@ -156,7 +172,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
         ctxname="$argv[1]" yq '.contexts.[] | .name==env(ctxname)' < $config | string match -q 'true'
         if test $status = 0
           echo "Found matching context in $config"
-          set -gx KUBECONFIG $config
+          cat $config > $SESSION_KUBECONFIG
           set -Ux OG_KUBECONFIG $config
           kubectl config use-context $argv
           return
@@ -169,10 +185,10 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
     end
   end
 
-  # namespace switcher
   function kns
     if count $argv > /dev/null
-      kubectl config set-context --current --namespace $argv
+      kubectl config set-context --current --namespace $argv > /dev/null
+      KUBECONFIG=$OG_KUBECONFIG kubectl config set-context --current --namespace $argv > /dev/null
     else
       kubectl get ns
     end
