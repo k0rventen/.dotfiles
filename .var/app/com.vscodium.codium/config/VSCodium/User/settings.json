@@ -8,7 +8,6 @@
         "overrideName": true
       }
     },
-    "workbench.statusBar.visible": false,
     "workbench.colorTheme": "Catppuccin Macchiato",
     "workbench.iconTheme": "catppuccin-macchiato",
     "workbench.startupEditor": "none",
@@ -44,4 +43,7 @@
         "[github-actions-workflow]": {
           "editor.defaultFormatter": "redhat.vscode-yaml"
         },
+        "workbench.statusBar.visible": false,
+        "workbench.panel.showLabels": false,
+        "workbench.sideBar.location": "right",
 }
