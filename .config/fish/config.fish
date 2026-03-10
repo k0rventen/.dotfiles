@@ -43,6 +43,7 @@ abbr gc --set-cursor='%' -- 'git commit -m "%"'
 
 # needs wl-clipboard for wayland or xclip on x11
 abbr --position anywhere cc '| fish_clipboard_copy'
+abbr pc 'fish_clipboard_copy |'
 
 
 function gb
@@ -97,7 +98,7 @@ alias dots "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 # but runs locally using ollama
 if command -q ollama
   function h --description "talk to your sidekick engineer"
-      ollama run devops "$argv"
+      ollama run devops --think=false "$argv"
   end
 end
 
@@ -119,7 +120,9 @@ end
 
 # create a random hex of len $argv
 function rand_token
-  cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv
+  set token (cat /dev/urandom | tr -dc '[:alnum:]' | head -c $argv)
+  echo $token | fish_clipboard_copy
+  echo $token
 end
 
 # like watch -n2, but herits from aliases, functions and env vars
