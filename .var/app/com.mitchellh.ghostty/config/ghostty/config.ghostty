@@ -1,0 +1,26 @@
+# UI
+theme = Catppuccin Macchiato
+font-size = 12
+split-divider-color = #aaa
+minimum-contrast = 4
+mouse-hide-while-typing = true
+unfocused-split-opacity = 0.6
+right-click-action = ignore
+mouse-scroll-multiplier = 16
+cursor-click-to-move = true
+focus-follows-mouse = true
+
+keybind = performable:ctrl+c=copy_to_clipboard
+keybind = ctrl+v=paste_from_clipboard
+keybind = all:ctrl+shift+v=new_split:right
+keybind = all:ctrl+shift+h=new_split:down
+keybind = ctrl+t=new_tab
+
+window-padding-x = 4
+window-padding-y = 4
+
+window-decoration = auto
+resize-overlay = never
+
+app-notifications = no-clipboard-copy
+gtk-titlebar-style = tabs
