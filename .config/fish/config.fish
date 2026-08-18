@@ -1,10 +1,10 @@
-# envs 
+# envs
 set -xg EDITOR nano
 set -xg LSCOLORS gxfxcxdxbxegedabagacad
 set -xg LS_COLORS 'di=36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43'
 set -xg TERM xterm
 set -xg HOMEBREW_NO_AUTO_UPDATE 1
-
+set -xg HOMEBREW_NO_ENV_HINTS 1
 
 # single-letter aliases, abbr and functions
 alias k 'kubectl'
@@ -12,19 +12,18 @@ alias p 'python3'
 alias b 'brew'
 alias d 'docker'
 alias g 'git'
-alias n 'k9s --headless --crumbsless'
-alias t 'tmux -f ~/.config/tmux.conf'
+alias n 'k9s --headless --crumbsless --splashless'
+
 abbr u 'sudo apt update && sudo apt upgrade && brew update && brew upgrade && flatpak update'
 function o; count $argv > /dev/null; and open $argv; or open . ;end
-function c; count $argv > /dev/null; and flatpak run com.vscodium.codium $argv &> /dev/null; or flatpak run com.vscodium.codium . &> /dev/null;end
+function z; count $argv > /dev/null; and flatpak run dev.zed.Zed $argv &> /dev/null; or flatpak run dev.zed.Zed . &> /dev/null;end
 
-
-# use kubecolor is avail 
+# use kubecolor is avail
 if command -q kubecolor
   function kubectl --wraps kubectl; command kubecolor $argv; end
 end
 
-# very frequently used abbr
+# short abbr
 abbr kp kubectl port-forward
 abbr kl kubectl logs
 abbr --command={k,kubectl} -- y -o=yaml
@@ -33,6 +32,7 @@ abbr --command={k,kubectl} -- c --dry-run=client
 abbr --command={k,kubectl} -- s --dry-run=server
 
 abbr dc docker compose
+
 abbr gs git status
 abbr ga git add
 abbr gu git restore --staged
@@ -43,14 +43,18 @@ abbr gc --set-cursor='%' -- 'git commit -m "%"'
 
 # needs wl-clipboard for wayland or xclip on x11
 abbr --position anywhere cc '| fish_clipboard_copy'
-abbr pc 'fish_clipboard_copy |'
+abbr -a pc 'fish_clipboard_paste |'
 
 
+# checkout or create a new branch
 function gb
   git fetch && git branch | grep ' '$argv'$' > /dev/null; and git checkout $argv; or git checkout -b $argv
 end
 complete -c gb -f -a "(git branch --format='%(refname:strip=2)')"
 
+# shortcuts
+alias invokeai 'docker run --gpus=all --publish 9090:9090 -v ./invoke:/invokeai  ghcr.io/invoke-ai/invokeai:main-cuda'
+alias llamacpp 'docker run --gpus all -p 8080:8080 -v ./llama-models:/models ghcr.io/ggml-org/llama.cpp:server-cuda13 -m /models/ornith-1.0-9b-Q6_K.gguf -fa on -ngl all --reasoning-preserve'
 
 # quick containers
 alias alp 'd run -it -w /data -v .:/data alpine sh'
@@ -94,19 +98,6 @@ set -g __fish_git_prompt_char_cleanstate '='
 # dotfiles setup
 alias dots "git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 
-# inspired by https://kadekillary.work/posts/1000x-eng/
-# but runs locally using ollama
-if command -q ollama
-  function h --description "talk to your sidekick engineer"
-      ollama run devops --think=false "$argv"
-  end
-end
-
-# better trash
-if command -q gomi
-  alias rm gomi
-end
-
 
 # decode b64 from stdin
 function bdec
@@ -146,7 +137,7 @@ function foreach
   end
 end
 
-function kdec 
+function kdec
   kubectl get secrets $argv --template='{{ range $key, $value := .data }}{{ printf "%s: %s\n" $key ($value | base64decode) }}{{ end }}'
 end
 complete -c kdec -f -a "(kubectl get secret -o custom-columns=name:metadata.name --no-headers)"
@@ -158,7 +149,7 @@ if test -d ~/.kube/configs && command -q yq && command -q kubectl
   # kctx will load a 'reference' kconf and set a tmp file w/ the same content
   # kns will change both the reference (for new sessions to inherit the ns) and tmp
 
-  # initial kubeconfig setup, 
+  # initial kubeconfig setup,
   # if no reference that all of the avail kconf
   set -gx SESSION_KUBECONFIG (mktemp)
   function delete_session_kubeconfig_when_exit --on-event fish_exit;rm $SESSION_KUBECONFIG; end
