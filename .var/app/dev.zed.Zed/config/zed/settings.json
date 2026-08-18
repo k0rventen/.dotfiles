@@ -1,0 +1,140 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "search": {
+    "center_on_match": true,
+    "case_sensitive": false
+  },
+  "tab_bar": {
+    "show": true
+  },
+  "show_edit_predictions": false,
+  "icon_theme": "Catppuccin Macchiato",
+  "default_open_behavior": "new_window",
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "proxy": "",
+  "diagnostics": {
+    "button": false
+  },
+  "status_bar": {
+    "cursor_position_button": false,
+    "active_language_button": false
+  },
+  "debugger": {
+    "button": false
+  },
+  "outline_panel": {
+    "button": false
+  },
+  "collaboration_panel": {
+    "button": false
+  },
+  "context_servers": {
+    "kubernetes-mcp-server": {
+      "enabled": true,
+      "url": "http://127.0.0.1:8081/mcp"
+    }
+  },
+  "language_models": {
+    "openai_compatible": {
+      "llama.cpp": {
+        "api_url": "http://127.0.0.1:8080/v1",
+        "available_models": [
+          {
+            "name": "model",
+            "max_tokens": 200000,
+            "max_output_tokens": 32000,
+            "max_completion_tokens": 200000,
+            "capabilities": {
+              "tools": true,
+              "images": false,
+              "parallel_tool_calls": false,
+              "prompt_cache_key": false,
+              "chat_completions": true,
+              "interleaved_reasoning": false,
+              "max_tokens_parameter": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cli_default_open_behavior": "new_window",
+  "agent": {
+    "enable_feedback": false,
+    "dock": "left",
+    "sidebar_side": "left",
+    "flexible": false,
+    "default_profile": "write",
+    "tool_permissions": {
+      "tools": {
+        "mcp:kubernetes-mcp-server:resources_get": {
+          "default": "allow"
+        },
+        "mcp:kubernetes-mcp-server:pods_list": {
+          "default": "allow"
+        },
+        "mcp:kubernetes-mcp-server:resources_list": {
+          "default": "allow"
+        },
+        "mcp:kubernetes-mcp-server:namespaces_list": {
+          "default": "allow"
+        },
+        "terminal": {
+          "default": "allow"
+        }
+      }
+    },
+    "inline_assistant_model": {
+      "provider": "openrouter",
+      "model": "openrouter/free",
+      "enable_thinking": false
+    },
+    "default_model": {
+      "provider": "llama.cpp",
+      "model": "model",
+      "enable_thinking": false
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "auto_update": false,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false,
+  },
+  "edit_predictions": {
+    "open_ai_compatible_api": {
+      "api_url": "",
+    },
+    "allow_data_collection": "no",
+  },
+  "title_bar": {
+    "show_user_picture": false,
+    "show_user_menu": false,
+    "show_sign_in": false,
+  },
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Catppuccin Macchiato",
+  },
+  "terminal": {
+    "shell": "system",
+    "env": {
+      "LD_LIBRARY_PATH": "",
+      "LD_PRELOAD": "",
+    },
+  },
+}
